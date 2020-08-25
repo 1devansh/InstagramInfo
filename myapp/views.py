@@ -5,8 +5,7 @@ from bs4 import BeautifulSoup
 from . import models
 
 # Create your views here.
-BASE_CRAIGSLIST_URL = 'https://losangeles.craigslist.org/search/?query={}'
-BASE_IMAGE_URL = 'https://images.craigslist.org/{}_300x300.jpg'
+BASE_CRAIGSLIST_URL = 'https://www.instagram.com/{}'
 
 def home(request):
   return render(request, 'base.html')
@@ -23,30 +22,29 @@ def new_search(request):
   data = response.text
   soup = BeautifulSoup(data, features='html.parser')
 
-  post_listings = soup.find_all('li', {'class': 'result-row'})
   
-  final_postings = []
+  
+  post_listings = soup.find('meta', property="og:description")
 
-  for post in post_listings:
-      post_title = post.find(class_='result-title').text
-      post_url = post.find('a').get('href')
+  info = post_listings.attrs['content']
+  
 
-      if post.find(class_='result-price'):
-        post_price = post.find(class_='result-price').text
-      else:
-        post_price = 'N/A'
+  info = info.split('-')[0]
 
-      if post.find(class_='result-image').get('data-ids'):
-        post_image_id = post.find(class_='result-image').get('data-ids').split(',')[0].split(':')[1]
-        post_image_url = BASE_IMAGE_URL.format(post_image_id)
-        
-      else:
-        post_image_url = 'https://craigslist.org/images/peace.jpg'
+  followers = info.split(',')[0].split(' ')[0]
+  following = info.split(',')[1].strip().split(' ')[0]
+  posts = info.split(',')[2].strip().split(' ')[0]
 
-      final_postings.append((post_title, post_url, post_price, post_image_url))
+  
 
+  image_source = soup.find('meta', property="og:image")
+  image_source = image_source.attrs['content']
+  
+
+  final = [followers, following, posts, image_source, final_url]
+  print(final)
   stuff_for_frontend={
     'search': search, 
-    'final_postings': final_postings,
+    'final_postings': final,
   }
   return render(request, 'myapp/new_search.html', stuff_for_frontend)
