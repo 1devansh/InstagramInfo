@@ -1,1 +1,1 @@
-# this is a craigslist clone
+# this is a Instagram info scrapper
